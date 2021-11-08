@@ -13,6 +13,12 @@ public class Main {
         headAriseArray(mainArray);
         maxQuantityIncreaseNumbers(mainArray);
         sumOfNegativeNumbersAfterTheFirstPositiveToNextPositive(mainArray);
+        int maxNumber = maxNumber(mainArray);
+        int amount = amountMaxNumber(mainArray,maxNumber);
+        int[] verticalCoordinates = verticalCoordinatesMaxNum(mainArray,maxNumber, amount);
+        int[][] cutArrayAlongVertical = createMatrixWithoutVerticalCoordinates(mainArray, verticalCoordinates);
+        int[] horizontalCoordinates = horizontalCoordinatesMaxNum(mainArray,maxNumber, amount);
+        createOurMatrix(cutArrayAlongVertical, horizontalCoordinates);
     }
 
     public static int[][]getMatrix(int n){
@@ -62,26 +68,20 @@ public class Main {
     int[][] horizontalArray = new int[mainArray.length][mainArray.length];
     int[][] verticalArray = new int[mainArray.length][mainArray.length];
     for (int i = 0; i < mainArray.length; i++) { //сначала делаем единички и нолики для строк
-        System.out.print((i+1) + ")  ");
         horizontalArray[i][0] = 0;
         for (int j = 1; j < mainArray.length; j++) {
             if (mainArray[i][j] > mainArray[i][j-1]){
                 horizontalArray[i][j] = horizontalArray[i][j-1] + 1;
             }else {horizontalArray[i][j] = 0;}
-            System.out.print(horizontalArray[i][j] + " | ");
-        }   System.out.println();
-    }       System.out.println();
-
+        }
+    }
     for (int i = 0; i < mainArray.length; i++) {
-        System.out.print((i+1) + ")  ");
         verticalArray[0][i] = 0;
         for (int j = 1; j < mainArray.length; j++) {
             if (mainArray[j][i] > mainArray[j-1][i]){
                 verticalArray[j][i] = verticalArray[j-1][i] + 1;
             }else{verticalArray[j][i] = 0;}
-            System.out.print(verticalArray[j][i] + " | ");
         }
-        System.out.println();
     }
 
     int quentity = 0;
@@ -134,9 +134,149 @@ public class Main {
                     "числа до второго положительного числа, = " + sum);
             return sum;}
 // 4) Найти максимальный элемент в матрице и удалить из матрицы все строки и столбцы, его содержащие.
-// Предлагаю здесь разбить на 2 метода. 1-й ищет максимальное число и его (их) координаты.
-// 2-й вырезает из массива строки и столбцы по координатам.
-
-
+    public static int maxNumber(int[][] array) {
+    int maxNumber = -1;
+    for (int i = 0; i < array.length; i++) {
+        for (int j = 0; j < array.length; j++) {
+            if (array[i][j] > maxNumber) {
+                maxNumber = array[i][j];
+            }
+        }
     }
+    System.out.println("Максимальное число матрицы равно " + maxNumber);
+    return maxNumber;
+} //находим максимальное число матрицы
+    public static int amountMaxNumber(int[][] array, int maxNumber) {
+        int quantity = 0;
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array.length; j++) {
+                if (array[i][j] == maxNumber) {
+                    quantity++;
+                }
+            }
+        }
+        System.out.println("Частота встречаемости максимального числа в матрице равно " + quantity);
+        return quantity;
+    }
+    public static int[] verticalCoordinatesMaxNum(int[][] array, int maxNumber, int amount){
+        int[] verticalCoordinates = new int[amount];
+        int coordinatePlace = 0;
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array.length; j++) {
+                if(array[i][j] == maxNumber){
+                    verticalCoordinates[coordinatePlace] = i;
+                    coordinatePlace++;
+                }
+            }
+        }
+        Arrays.sort(verticalCoordinates);
+
+        int coordinate = verticalCoordinates[0];
+        int verticalCoordinatesWithoutRepeatLength = verticalCoordinates.length;
+        for (int i = 1; i < verticalCoordinates.length; i++) {//вычисляем длину массива координат без повтора координат
+            if (verticalCoordinates[i] == coordinate){
+                coordinate = verticalCoordinates[i];
+                verticalCoordinatesWithoutRepeatLength--;
+            }else{coordinate = verticalCoordinates[i];}
+        }
+        int[] verticalCoordinatesWithoutRepeat = new int[verticalCoordinatesWithoutRepeatLength];
+        verticalCoordinatesWithoutRepeat[0] = verticalCoordinates[0];
+        int index = verticalCoordinates[0];
+        int y = 1;
+        for (int i = 1; i < verticalCoordinates.length; i++) {
+            if(verticalCoordinates[i] != index){
+                verticalCoordinatesWithoutRepeat[y] = verticalCoordinates[i];
+                y++;
+                index = verticalCoordinates[i];
+            }else{continue;}
+        }
+        System.out.println("Координаты максимальных чисел по вертикали (без повтора): "
+                + Arrays.toString(verticalCoordinatesWithoutRepeat));
+        return verticalCoordinatesWithoutRepeat;
+    }
+    public static int[][] createMatrixWithoutVerticalCoordinates(int[][] array, int[] verticalCoordinates){
+        int[][] cutArray = new int[array.length - verticalCoordinates.length][array.length];
+        int[] verticalCoordinatesPlusOne = new int[verticalCoordinates.length+1];
+        System.arraycopy(verticalCoordinates,0,verticalCoordinatesPlusOne,0,verticalCoordinates.length);
+        verticalCoordinatesPlusOne[verticalCoordinates.length] = -1;
+        int y = 0;
+        int a = 0;
+        for (int i = 0; i < array.length; i++) {
+            int index = verticalCoordinatesPlusOne[a];
+            if(i != index){
+                cutArray[y] = array[i];
+                y++;
+            }else{a++;continue;}
+        }
+        return cutArray;}
+    public static int[] horizontalCoordinatesMaxNum(int[][] array, int maxNumber, int amount){
+        int[] horizontalCoordinates = new int[amount];
+        int coordinatePlace = 0;
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array.length; j++) {
+                if(array[i][j] == maxNumber){
+                    horizontalCoordinates[coordinatePlace] = j;
+                    coordinatePlace++;
+                }
+            }
+        }
+        Arrays.sort(horizontalCoordinates);
+
+        int coordinate = horizontalCoordinates[0];
+        int horizontalCoordinatesWithoutRepeatLength = horizontalCoordinates.length;
+        for (int i = 1; i < horizontalCoordinates.length; i++) {//вычисляем длину массива координат без повтора координат
+            if (horizontalCoordinates[i] == coordinate){
+                coordinate = horizontalCoordinates[i];
+                horizontalCoordinatesWithoutRepeatLength--;
+            }else{coordinate = horizontalCoordinates[i];}
+        }
+        int[] horizontalCoordinatesWithoutRepeat = new int[horizontalCoordinatesWithoutRepeatLength];
+        horizontalCoordinatesWithoutRepeat[0] = horizontalCoordinates[0];
+        int index = horizontalCoordinates[0];
+        int y = 1;
+        for (int i = 1; i < horizontalCoordinates.length; i++) {
+            if(horizontalCoordinates[i] != index){
+                horizontalCoordinatesWithoutRepeat[y] = horizontalCoordinates[i];
+                y++;
+                index = horizontalCoordinates[i];
+            }else{continue;}
+        }
+        System.out.println("Координаты максимальных чисел по горизонтали (без повтора): "
+                + Arrays.toString(horizontalCoordinatesWithoutRepeat));
+        return horizontalCoordinatesWithoutRepeat;
+    }
+    public static int[][] createOurMatrix(int[][] cutArray, int[] horizontalCoordinates){
+        int[] horizontalCoordinatesPlusOne = new int[horizontalCoordinates.length + 1];
+        System.arraycopy(horizontalCoordinates, 0, horizontalCoordinatesPlusOne, 0, horizontalCoordinates.length);
+        horizontalCoordinatesPlusOne[horizontalCoordinates.length] = -1;
+        int iLength = 0;
+        int jLength = 0;
+        for (int i = 0; i < cutArray.length; i++) {
+            for (int j = 0; j < cutArray[i].length; j++) {
+                iLength = i+1;
+                jLength = j+1;
+            }
+        }
+        int[][] ourArray = new int[iLength][jLength - horizontalCoordinates.length];
+
+
+        for (int i = 0; i < cutArray.length; i++) {int y = 0;int a = 0;
+            for (int j = 0; j < cutArray[i].length; j++) {
+                int index = horizontalCoordinatesPlusOne[a];
+                if (j != index){
+                    ourArray[i][y] = cutArray[i][j];
+                    y++;
+                }else{
+                    a++; continue;}
+            }
+        }
+        System.out.println("Конечная матрица, без строк и столбцов, изначально содержащих максимальное число матрицы: ");
+        for (int i = 0; i < ourArray.length; i++) {
+            for (int j = 0; j < ourArray[i].length; j++) {
+                System.out.print(ourArray[i][j] + " | ");
+            }   System.out.println();
+        }
+
+        return ourArray;}
+}
 
